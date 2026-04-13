@@ -5,12 +5,19 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'db.runCommand({ ping: 1 }).ok' | mongosh localhost:27017/test --quiet | grep 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
 
   product-service:
     build:
       context: ./product-service
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     environment:
       MONGODB_HOST: mongo
       MONGODB_PORT: "27017"
@@ -21,8 +28,10 @@ services:
     build:
       context: ./order-service
     depends_on:
-      - mongo
-      - product-service
+      mongo:
+        condition: service_healthy
+      product-service:
+        condition: service_started
     environment:
       MONGODB_HOST: mongo
       MONGODB_PORT: "27017"
