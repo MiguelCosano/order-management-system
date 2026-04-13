@@ -1,0 +1,34 @@
+services:
+  mongo:
+    image: mongo:8
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  product-service:
+    build:
+      context: ./product-service
+    depends_on:
+      - mongo
+    environment:
+      MONGODB_HOST: mongo
+      MONGODB_PORT: "27017"
+    ports:
+      - "8081:8081"
+
+  order-service:
+    build:
+      context: ./order-service
+    depends_on:
+      - mongo
+      - product-service
+    environment:
+      MONGODB_HOST: mongo
+      MONGODB_PORT: "27017"
+      PRODUCT_SERVICE_URL: http://product-service:8081
+    ports:
+      - "8082:8082"
+
+volumes:
+  mongo-data:

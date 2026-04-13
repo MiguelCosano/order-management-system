@@ -3,7 +3,7 @@ PRODUCT_SERVICE_MVN := ./mvnw
 ORDER_SERVICE_DIR := order-service
 ORDER_SERVICE_MVN := ./mvnw
 
-.PHONY: help product-build product-api product-test product-package product-clean order-build order-api order-test order-package order-clean
+.PHONY: help product-build product-api product-test product-package product-clean order-build order-api order-test order-package order-clean docker-package docker-up docker-down docker-logs
 
 help:
 	@printf "Available targets:\n"
@@ -17,6 +17,10 @@ help:
 	@printf "  order-test    Run order-service tests\n"
 	@printf "  order-package Package the order-service application\n"
 	@printf "  order-clean   Clean order-service build outputs\n"
+	@printf "  docker-package Build both service JARs for Docker\n"
+	@printf "  docker-up      Build JARs and start the Docker Compose stack\n"
+	@printf "  docker-down    Stop the Docker Compose stack\n"
+	@printf "  docker-logs    Follow Docker Compose logs\n"
 
 product-build:
 	cd $(PRODUCT_SERVICE_DIR) && $(PRODUCT_SERVICE_MVN) clean compile
@@ -47,3 +51,14 @@ order-package:
 
 order-clean:
 	cd $(ORDER_SERVICE_DIR) && $(ORDER_SERVICE_MVN) clean
+
+docker-package: product-package order-package
+
+docker-up: docker-package
+	docker compose up --build
+
+docker-down:
+	docker compose down
+
+docker-logs:
+	docker compose logs -f
