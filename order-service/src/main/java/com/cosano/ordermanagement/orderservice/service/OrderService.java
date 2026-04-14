@@ -4,6 +4,8 @@ import com.cosano.ordermanagement.orderservice.client.ProductClient;
 import com.cosano.ordermanagement.orderservice.dto.OrderResponse;
 import com.cosano.ordermanagement.orderservice.dto.ProductResponse;
 import com.cosano.ordermanagement.orderservice.entity.Order;
+import com.cosano.ordermanagement.orderservice.entity.OrderStatus;
+import com.cosano.ordermanagement.orderservice.exception.InvalidOrderStateException;
 import com.cosano.ordermanagement.orderservice.exception.OrderNotFoundException;
 import com.cosano.ordermanagement.orderservice.exception.ProductServiceException;
 import com.cosano.ordermanagement.orderservice.repository.OrderRepository;
@@ -23,11 +25,9 @@ public class OrderService {
     }
 
     public OrderResponse createOrder(List<String> productIds) {
-
         double total = 0;
 
         for (String id : productIds) {
-
             ProductResponse product = productClient.getProductById(id);
 
             if (product == null) {
@@ -44,11 +44,10 @@ public class OrderService {
         Order order = Order.builder()
                 .productIds(productIds)
                 .totalAmount(total)
-                .status("CREATED")
+                .status(OrderStatus.CREATED)
                 .build();
 
         Order saved = orderRepository.save(order);
-
         return mapToResponse(saved);
     }
 
@@ -64,6 +63,20 @@ public class OrderService {
                 .orElseThrow(() -> new OrderNotFoundException(id));
 
         return mapToResponse(order);
+    }
+
+    public OrderResponse cancelOrder(String id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException(id));
+
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            throw new InvalidOrderStateException("Order is already cancelled: " + id);
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+        Order updated = orderRepository.save(order);
+
+        return mapToResponse(updated);
     }
 
     private OrderResponse mapToResponse(Order order) {

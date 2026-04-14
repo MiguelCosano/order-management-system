@@ -20,6 +20,5 @@ public class Order {
 
     private Double totalAmount;
 
-    private String status; // CREATED, CANCELLED
-
+    private OrderStatus status;
 }

@@ -1,5 +1,6 @@
 package com.cosano.ordermanagement.orderservice.dto;
 
+import com.cosano.ordermanagement.orderservice.entity.OrderStatus;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,5 +16,5 @@ public class OrderResponse {
 
     private Double totalAmount;
 
-    private String status;
+    private OrderStatus status;
 }
