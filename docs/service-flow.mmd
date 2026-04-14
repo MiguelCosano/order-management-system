@@ -1,0 +1,12 @@
+flowchart LR
+    client[Client]
+    product[product-service]
+    order[order-service]
+    mongo[(MongoDB)]
+
+    client -->|Create and query products| product
+    product -->|Store products in productdb| mongo
+
+    client -->|Create, query, and cancel orders| order
+    order -->|Validate product IDs and fetch prices| product
+    order -->|Store orders in orderdb| mongo
