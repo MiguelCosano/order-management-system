@@ -2,11 +2,14 @@ PRODUCT_SERVICE_DIR := product-service
 PRODUCT_SERVICE_MVN := ./mvnw
 ORDER_SERVICE_DIR := order-service
 ORDER_SERVICE_MVN := ./mvnw
+ROOT_MVN := ./order-service/mvnw
+ROOT_POM := -f pom.xml
 
-.PHONY: help product-build product-api product-test product-package product-clean order-build order-api order-test order-package order-clean docker-package docker-up docker-down docker-logs
+.PHONY: help build-all product-build product-api product-test product-package product-clean order-build order-api order-test order-package order-clean docker-package docker-up docker-down docker-logs
 
 help:
 	@printf "Available targets:\n"
+	@printf "  build-all       Build all Maven submodules from the repository root\n"
 	@printf "  product-build   Build the product-service module\n"
 	@printf "  product-api     Launch the product-service API\n"
 	@printf "  product-test    Run product-service tests\n"
@@ -21,6 +24,9 @@ help:
 	@printf "  docker-up      Build JARs and start the Docker Compose stack\n"
 	@printf "  docker-down    Stop the Docker Compose stack\n"
 	@printf "  docker-logs    Follow Docker Compose logs\n"
+
+build-all:
+	$(ROOT_MVN) $(ROOT_POM) clean compile
 
 product-build:
 	cd $(PRODUCT_SERVICE_DIR) && $(PRODUCT_SERVICE_MVN) clean compile

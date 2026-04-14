@@ -4,6 +4,8 @@ import com.cosano.ordermanagement.orderservice.client.ProductClient;
 import com.cosano.ordermanagement.orderservice.dto.OrderResponse;
 import com.cosano.ordermanagement.orderservice.dto.ProductResponse;
 import com.cosano.ordermanagement.orderservice.entity.Order;
+import com.cosano.ordermanagement.orderservice.exception.OrderNotFoundException;
+import com.cosano.ordermanagement.orderservice.exception.ProductServiceException;
 import com.cosano.ordermanagement.orderservice.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +30,12 @@ public class OrderService {
 
             ProductResponse product = productClient.getProductById(id);
 
-            if (!product.getActive()) {
-                throw new RuntimeException("Product inactive: " + id);
+            if (product == null) {
+                throw new ProductServiceException("Product not found: " + id);
+            }
+
+            if (!Boolean.TRUE.equals(product.getActive())) {
+                throw new ProductServiceException("Product is inactive: " + id);
             }
 
             total += product.getPrice();
@@ -55,7 +61,7 @@ public class OrderService {
 
     public OrderResponse getOrderById(String id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found: " + id));
+                .orElseThrow(() -> new OrderNotFoundException(id));
 
         return mapToResponse(order);
     }
