@@ -137,11 +137,14 @@ The root aggregator should expose both Maven modules in the same workspace:
 | `make product-build` | Compile `product-service` |
 | `make product-api` | Run `product-service` locally |
 | `make product-test` | Run `product-service` tests |
+| `make product-verify` | Run `product-service` unit tests, integration tests, and coverage |
 | `make product-package` | Package `product-service` |
 | `make order-build` | Compile `order-service` |
 | `make order-api` | Run `order-service` locally |
 | `make order-test` | Run `order-service` tests |
+| `make order-verify` | Run `order-service` unit tests, integration tests, and coverage |
 | `make order-package` | Package `order-service` |
+| `make verify-all` | Run `verify` for both services |
 | `make docker-package` | Build both JARs for Docker |
 | `make docker-up` | Package both services and start the Docker stack |
 | `make docker-down` | Stop the Docker stack |
@@ -289,14 +292,52 @@ Business rules currently enforced:
 
 ## Testing
 
-Run the test suites with:
+Each service includes:
+
+- unit tests with JUnit 5 and Mockito
+- integration tests with Testcontainers and MongoDB
+- JaCoCo coverage reporting
+
+Run tests from a service directory with:
+
+```bash
+./mvnw test
+```
+
+This runs the unit test suite.
+
+Run tests from the repository root with the existing Make targets:
 
 ```bash
 make product-test
 make order-test
 ```
 
-Both commands currently pass in this repository.
+Run the full unit + integration + coverage flow from the repository root with:
+
+```bash
+make product-verify
+make order-verify
+
+# or both
+make verify-all
+```
+
+Generate the JaCoCo coverage report for a service with:
+
+```bash
+./mvnw verify
+```
+
+This runs unit tests, Testcontainers integration tests, and generates coverage output.
+
+The HTML report is generated at:
+
+```text
+target/site/jacoco/index.html
+```
+
+Integration tests use Testcontainers with MongoDB, so Docker must be available when running the test suite.
 
 ## Troubleshooting
 
