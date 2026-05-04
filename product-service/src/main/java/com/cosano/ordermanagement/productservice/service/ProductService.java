@@ -7,6 +7,9 @@ import com.cosano.ordermanagement.productservice.dto.UpdateProductRequest;
 import com.cosano.ordermanagement.productservice.entity.Product;
 import com.cosano.ordermanagement.productservice.exception.ProductNotFoundException;
 import com.cosano.ordermanagement.productservice.repository.ProductRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,11 +48,13 @@ public class ProductService {
                 .toList();
     }
 
+    @Cacheable(value = "products", key = "#id")
     public ProductResponse getProductById(String id) {
         Product product = findProductOrThrow(id);
         return mapToResponse(product);
     }
 
+    @CachePut(value = "products", key = "#id")
     public ProductResponse updateProduct(String id, UpdateProductRequest request) {
         Product existingProduct = findProductOrThrow(id);
 
@@ -64,6 +69,7 @@ public class ProductService {
         return mapToResponse(updated);
     }
 
+    @CacheEvict(value = "products", key = "#id")
     public void deleteProduct(String id) {
         Product existingProduct = findProductOrThrow(id);
         productRepository.delete(existingProduct);
