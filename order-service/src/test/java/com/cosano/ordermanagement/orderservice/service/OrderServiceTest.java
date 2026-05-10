@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -120,6 +121,37 @@ class OrderServiceTest {
     }
 
     @Test
+    void getAllOrdersReturnsMappedResponses() {
+        Order firstOrder = Order.builder()
+                .id("order-1")
+                .productIds(List.of("product-1", "product-2"))
+                .totalAmount(74.99)
+                .status(OrderStatus.CREATED)
+                .build();
+
+        Order secondOrder = Order.builder()
+                .id("order-2")
+                .productIds(List.of("product-3"))
+                .totalAmount(19.99)
+                .status(OrderStatus.CANCELLED)
+                .build();
+
+        when(orderRepository.findAll()).thenReturn(List.of(firstOrder, secondOrder));
+
+        List<OrderResponse> responses = orderService.getAllOrders();
+
+        assertEquals(2, responses.size());
+        assertEquals("order-1", responses.get(0).getId());
+        assertIterableEquals(List.of("product-1", "product-2"), responses.get(0).getProductIds());
+        assertEquals(74.99, responses.get(0).getTotalAmount(), 0.0001);
+        assertEquals(OrderStatus.CREATED, responses.get(0).getStatus());
+        assertEquals("order-2", responses.get(1).getId());
+        assertIterableEquals(List.of("product-3"), responses.get(1).getProductIds());
+        assertEquals(19.99, responses.get(1).getTotalAmount(), 0.0001);
+        assertEquals(OrderStatus.CANCELLED, responses.get(1).getStatus());
+    }
+
+    @Test
     void cancelOrderUpdatesStatusSuccessfully() {
         Order existingOrder = Order.builder()
                 .id("order-1")
@@ -135,6 +167,18 @@ class OrderServiceTest {
 
         assertEquals(OrderStatus.CANCELLED, existingOrder.getStatus());
         assertEquals(OrderStatus.CANCELLED, response.getStatus());
+    }
+
+    @Test
+    void cancelOrderThrowsWhenOrderDoesNotExist() {
+        when(orderRepository.findById("missing-order")).thenReturn(Optional.empty());
+
+        OrderNotFoundException exception = assertThrows(
+                OrderNotFoundException.class,
+                () -> orderService.cancelOrder("missing-order")
+        );
+
+        assertEquals("Order not found with id: missing-order", exception.getMessage());
     }
 
     @Test
