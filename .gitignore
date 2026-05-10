@@ -31,3 +31,6 @@ replay_pid*
 node-compile-cache/
 .mtj.tmp/
 *.ctxt
+
+# Local dev process metadata
+.run/
