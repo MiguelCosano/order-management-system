@@ -1,16 +1,20 @@
-# Compiled class file
+# OS files
+.DS_Store
+
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# Maven / Java build output
+target/
+*/target/
 *.class
 
-# Log file
+# Logs
 *.log
 
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# Java packaging outputs
 *.jar
 *.war
 *.nar
@@ -19,9 +23,11 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Java crash dumps
 hs_err_pid*
 replay_pid*
 
-.idea
+# Misc local caches
 node-compile-cache/
+.mtj.tmp/
+*.ctxt

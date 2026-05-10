@@ -2,10 +2,12 @@ PRODUCT_SERVICE_DIR := product-service
 PRODUCT_SERVICE_MVN := ./mvnw
 ORDER_SERVICE_DIR := order-service
 ORDER_SERVICE_MVN := ./mvnw
+GATEWAY_DIR := api-gateway
 ROOT_MVN := ./order-service/mvnw
 ROOT_POM := -f pom.xml
+GATEWAY_POM := -f $(GATEWAY_DIR)/pom.xml
 
-.PHONY: help build-all product-build product-api product-test product-verify product-package product-clean order-build order-api order-test order-verify order-package order-clean verify-all docker-package docker-up docker-down docker-logs
+.PHONY: help build-all product-build product-api product-test product-verify product-package product-clean order-build order-api order-test order-verify order-package order-clean gateway-build gateway-api gateway-test gateway-verify gateway-package gateway-clean verify-all docker-package docker-up docker-down docker-logs
 
 help:
 	@printf "Available targets:\n"
@@ -22,8 +24,14 @@ help:
 	@printf "  order-verify  Run order-service unit tests, integration tests, and coverage\n"
 	@printf "  order-package Package the order-service application\n"
 	@printf "  order-clean   Clean order-service build outputs\n"
-	@printf "  verify-all     Run verify for both services\n"
-	@printf "  docker-package Build both service JARs for Docker\n"
+	@printf "  gateway-build Build the api-gateway module\n"
+	@printf "  gateway-api   Launch the api-gateway API\n"
+	@printf "  gateway-test  Run api-gateway tests\n"
+	@printf "  gateway-verify Run api-gateway tests and verification tasks\n"
+	@printf "  gateway-package Package the api-gateway application\n"
+	@printf "  gateway-clean Clean api-gateway build outputs\n"
+	@printf "  verify-all     Run verify for all services\n"
+	@printf "  docker-package Build all service JARs for Docker\n"
 	@printf "  docker-up      Build JARs and start the Docker Compose stack\n"
 	@printf "  docker-down    Stop the Docker Compose stack\n"
 	@printf "  docker-logs    Follow Docker Compose logs\n"
@@ -67,9 +75,27 @@ order-package:
 order-clean:
 	cd $(ORDER_SERVICE_DIR) && $(ORDER_SERVICE_MVN) clean
 
-verify-all: product-verify order-verify
+gateway-build:
+	$(ROOT_MVN) $(GATEWAY_POM) clean compile
 
-docker-package: product-package order-package
+gateway-api:
+	$(ROOT_MVN) $(GATEWAY_POM) spring-boot:run
+
+gateway-test:
+	$(ROOT_MVN) $(GATEWAY_POM) test
+
+gateway-verify:
+	$(ROOT_MVN) $(GATEWAY_POM) verify
+
+gateway-package:
+	$(ROOT_MVN) $(GATEWAY_POM) clean package
+
+gateway-clean:
+	$(ROOT_MVN) $(GATEWAY_POM) clean
+
+verify-all: product-verify order-verify gateway-verify
+
+docker-package: product-package order-package gateway-package
 
 docker-up: docker-package
 	docker compose up --build -d
